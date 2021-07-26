@@ -5,33 +5,33 @@ function watch (callback, milliseconds) {
   return () => clearInterval(intervalId);
 }
 
-async function watchEvent (web3, thelaurel, name, callback, milliseconds = 60000) {
-  let lastBlock = await web3.provider.getBlockNumber();
-  lastBlock += 1;
+async function watchEvent (web3, thelaurel, name, lastBlock, callback, milliseconds = 60000) {
+  lastBlock = lastBlock || (await web3.provider.getBlockNumber());
   console.log('---- monitor watchEvent', name, lastBlock);
   return watch(async () => {
     console.log('monitor lastBlock', lastBlock);
     const events = await thelaurel.queryFilter(name, lastBlock);
-    // console.log('monitor events', events);
-    if (events.length > 0) {
-      lastBlock = Math.max(lastBlock, events[events.length - 1].blockNumber);
-    }
+    
     console.log('events', events.length);
+    // console.log('monitor events', events);
     for (const ev of events) {
       console.log('block', ev.blockNumber);
-      if (ev.blockNumber >= lastBlock) await callback(ev);
+      if (ev.blockNumber > lastBlock) await callback(ev);
+    }
+    if (events.length > 0) {
+      lastBlock = Math.max(lastBlock, events[events.length - 1].blockNumber);
     }
   }, milliseconds);
 }
 
-function watchTasks (web3, thelaurel, callback, milliseconds) {
+function watchTasks (web3, thelaurel, lastBlock, callback, milliseconds) {
   console.log('---- monitor watchTasks');
-  return watchEvent(web3, thelaurel, 'RegisterTask', callback, milliseconds);
+  return watchEvent(web3, thelaurel, 'RegisterTask', lastBlock, callback, milliseconds);
 }
 
-async function monitor (web3, thelaurel, callback, milliseconds = 5000) {
+async function monitor (web3, thelaurel, lastBlock, callback, milliseconds = 5000) {
   console.log('*****monitor START*****')
-  const unsubscribe = await watchTasks(web3, thelaurel, async (taskEvent) => {
+  const unsubscribe = await watchTasks(web3, thelaurel, lastBlock, async (taskEvent) => {
     const taskid = taskEvent.args.taskid;
     console.log('monitor taskid', taskid);
     const task = await getTaskData(taskid);

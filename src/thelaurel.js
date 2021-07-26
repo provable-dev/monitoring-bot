@@ -114,6 +114,7 @@ async function findGitHubIssue (taskid) {
   if (tasks.length > 0) {
     lastGitHubIssueCreatedAt = tasks[tasks.length - 1].created_at;
   }
+  if (cacheGitHubIssues[taskid]) return cacheGitHubIssues[taskid];
 }
 
 module.exports = {
