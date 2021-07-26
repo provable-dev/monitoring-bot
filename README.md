@@ -1,2 +1,2 @@
-# tikkun_bot
+# The Laurel Monitoring Bot
 
