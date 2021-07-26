@@ -1,0 +1,26 @@
+{
+  "name": "thelaurel-bot",
+  "version": "0.0.1",
+  "description": "The Laurel Bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "ethers": "^5.4.2",
+    "node-fetch": "^2.6.1"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/glitch-mvp-node"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "express"
+  ]
+}

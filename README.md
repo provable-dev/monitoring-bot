@@ -1,1 +1,2 @@
-# monitoring-bot
+# The Laurel Monitoring Bot
+
