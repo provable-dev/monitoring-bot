@@ -14,8 +14,8 @@ const whid = process.env.DISCORD_WH_ID;
 const alchemytoken = process.env.ALCHEMY_TOKEN;
 
 async function init () {
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  // const provider = new ethers.providers.AlchemyProvider('rinkeby', alchemytoken);
+  // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+  const provider = new ethers.providers.AlchemyProvider('rinkeby', alchemytoken);
 
   web3 = {provider};
   thelaurel = await getTheLaurel(web3, "0x638A246F0Ec8883eF68280293FFE8Cfbabe61B44")
