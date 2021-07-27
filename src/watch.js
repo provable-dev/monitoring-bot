@@ -1,37 +1,47 @@
-const {getTaskData, findGitHubIssue, laurelsMap, volunteersMap} = require("./thelaurel");
+const {getTaskData, findGitHubIssue, findClaimUrl, laurelsMap, volunteersMap} = require("./thelaurel");
 
 function watch (callback, milliseconds) {
   const intervalId = setInterval(callback, milliseconds);
   return () => clearInterval(intervalId);
 }
 
-async function watchEvent (web3, thelaurel, name, callback, milliseconds = 60000) {
-  let lastBlock = await web3.provider.getBlockNumber();
-  lastBlock += 1;
+async function watchEvent (web3, thelaurel, name, lastBlock, callback, milliseconds = 60000) {
+  lastBlock = lastBlock || (await web3.provider.getBlockNumber());
   console.log('---- monitor watchEvent', name, lastBlock);
   return watch(async () => {
     console.log('monitor lastBlock', lastBlock);
     const events = await thelaurel.queryFilter(name, lastBlock);
-    // console.log('monitor events', events);
-    if (events.length > 0) {
-      lastBlock = Math.max(lastBlock, events[events.length - 1].blockNumber);
-    }
+    
     console.log('events', events.length);
+    // console.log('monitor events', events);
     for (const ev of events) {
       console.log('block', ev.blockNumber);
-      if (ev.blockNumber >= lastBlock) await callback(ev);
+      if (ev.blockNumber > lastBlock) await callback(ev);
+    }
+    if (events.length > 0) {
+      lastBlock = Math.max(lastBlock, events[events.length - 1].blockNumber);
     }
   }, milliseconds);
 }
 
-function watchTasks (web3, thelaurel, callback, milliseconds) {
+function watchTasks (web3, thelaurel, lastBlock, callback, milliseconds) {
   console.log('---- monitor watchTasks');
-  return watchEvent(web3, thelaurel, 'RegisterTask', callback, milliseconds);
+  return watchEvent(web3, thelaurel, 'RegisterTask', lastBlock, callback, milliseconds);
 }
 
-async function monitor (web3, thelaurel, callback, milliseconds = 5000) {
+function watchClaims (web3, thelaurel, lastBlock, callback, milliseconds) {
+  console.log('---- monitor watchClaims');
+  return watchEvent(web3, thelaurel, 'RegisterOption', lastBlock, callback, milliseconds);
+}
+
+function watchVotes (web3, thelaurel, lastBlock, callback, milliseconds) {
+  console.log('---- monitor watchClaims');
+  return watchEvent(web3, thelaurel, 'Voted', lastBlock, callback, milliseconds);
+}
+
+async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 5000) {
   console.log('*****monitor START*****')
-  const unsubscribe = await watchTasks(web3, thelaurel, async (taskEvent) => {
+  const unsubscribeTasks = await watchTasks(web3, thelaurel, lastBlock, async (taskEvent) => {
     const taskid = taskEvent.args.taskid;
     console.log('monitor taskid', taskid);
     const task = await getTaskData(taskid);
@@ -42,13 +52,69 @@ async function monitor (web3, thelaurel, callback, milliseconds = 5000) {
       laurelid: task.task.laurelid,
       laurel: laurelsMap[task.task.laurelid],
       organizerData: volunteersMap[task.task.organizer],
-      beneficiaryData: volunteersMap[task.beneficiary],
+      beneficiaryData: volunteersMap[task.beneficiary] || task.beneficiary,
       gitHubIssue,
       transactionHash: taskEvent.transactionHash,
     }
-    callback(data);
+    callbacks.onTaskRegistered(data);
   }, milliseconds);
-  return unsubscribe;
+  
+  const unsubscribeClaims = await watchClaims(web3, thelaurel, lastBlock, async (taskEvent) => {
+    // event RegisterOption(bytes32 indexed taskid, bytes32 optionid, uint256 optionIndex);
+    const {taskid, optionid, optionIndex} = taskEvent.args;
+    console.log('monitor claim: taskid', taskid, optionIndex);
+    const task = await getTaskData(taskid);
+    const gitHubIssue = await findGitHubIssue(taskid);
+    const optionUrl = await findClaimUrl(gitHubIssue, optionid);
+    const data = {
+      taskid,
+      optionid,
+      optionIndex,
+      // ...task,
+      laurelid: task.task.laurelid,
+      laurel: laurelsMap[task.task.laurelid],
+      beneficiaryData: volunteersMap[task.beneficiary] || task.beneficiary,
+      gitHubIssue,
+      optionUrl,
+      transactionHash: taskEvent.transactionHash,
+    }
+    callbacks.onClaim(data);
+  }, milliseconds);
+  
+  const unsubscribeVotes = await watchVotes(web3, thelaurel, lastBlock, async (taskEvent) => {
+    // event Voted(bytes32 indexed taskid, uint256 optionIndex, uint256 WL, uint256 AL, uint256 weight);
+    const {taskid, optionIndex, WL, AL, weight} = taskEvent.args;
+    console.log('monitor vote: taskid', taskid, optionIndex);
+    const task = await getTaskData(taskid);
+    const gitHubIssue = await findGitHubIssue(taskid);
+    const receipt = await web3.provider.getTransactionReceipt(taskEvent.transactionHash);
+    console.log('----receipt', receipt.events);
+    const outcomes = receipt.events.filter(ev => ev.event === 'Outcome');
+    const winner = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 1);
+    const reverted = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 0);
+    
+    // winner.args.winner.toNumber()
+    // event Outcome(bytes32 indexed taskid, uint256 indexed typeOfEvent, uint256 indexed winner, uint256 optionxId, uint256 optionyId, uint256 x, uint256 y);
+    
+    
+    // && receipt.events.args , event
+    const data = {
+      taskid,
+      optionIndex,
+      WL, AL, weight,
+      ...task,
+      laurelid: task.task.laurelid,
+      laurel: laurelsMap[task.task.laurelid],
+      gitHubIssue,
+      voterData: volunteersMap[receipt.from] || receipt.from,
+      transactionHash: taskEvent.transactionHash,
+      winnerIndex: winner ? winner.args.winner.toNumber() : undefined,
+      revertedIndex: reverted ? reverted.args.winner.toNumber(): undefined,
+    }
+    callbacks.onVote(data);
+  }, milliseconds);
+  
+  return [unsubscribeTasks, unsubscribeClaims, unsubscribeVotes];
 }
 
 module.exports = {

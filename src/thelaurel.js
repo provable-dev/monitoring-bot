@@ -89,7 +89,9 @@ function getTaskFromIssue (issue) {
 
 function displayLaurelAmount (amount) {
   const a = typeof amount === 'object' && amount.toNumber ? amount.toNumber() : amount;
-  return (a / unit).toFixed(3);
+  const b = a / unit;
+  if (Math.floor(a / unit) == b) return b;
+  return b.toFixed(3);
 }
 
 async function getTaskData (taskid) {
@@ -114,6 +116,15 @@ async function findGitHubIssue (taskid) {
   if (tasks.length > 0) {
     lastGitHubIssueCreatedAt = tasks[tasks.length - 1].created_at;
   }
+  if (cacheGitHubIssues[taskid]) return cacheGitHubIssues[taskid];
+}
+
+async function findClaimUrl (issue, optionid) {
+  const comms = await fetch(issue.comments_url).then(r => r.json());
+  if (comms.length == 0) return;
+  const text = comms[0].body;
+  const hash = ethers.utils.solidityKeccak256(["string"], [text]);
+  if (optionid === hash) return text;
 }
 
 module.exports = {
@@ -123,6 +134,7 @@ module.exports = {
   displayLaurelAmount,
   getTaskData,
   findGitHubIssue,
+  findClaimUrl,
   laurelsMap,
   volunteersMap,
 }
