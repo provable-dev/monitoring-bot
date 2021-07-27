@@ -1,4 +1,5 @@
-const Discord = require("discord.js")
+const Discord = require("discord.js");
+var Twitter = require('twitter');
 const {ethers} = require("ethers");
 const client = new Discord.Client()
 const {getTheLaurel, displayLaurelAmount} = require("./src/thelaurel");
@@ -13,8 +14,43 @@ const whtoken = process.env.DISCORD_WH_TOKEN;
 const whid = process.env.DISCORD_WH_ID;
 const alchemytoken = process.env.ALCHEMY_TOKEN;
 
+
+const TW_MAX_CHAR = 350;
+const TW_KEY = process.env.TW_KEY;
+const TW_SECRET_KEY = process.env.TW_SECRET_KEY;
+const TW_BEARER_TOKEN = process.env.TW_BEARER_TOKEN;
+const TW_ACCESS_TOKEN = process.env.TW_ACCESS_TOKEN;
+const TW_ACCESS_TOKEN_SECRET = process.env.TW_ACCESS_TOKEN_SECRET;
+const twclient = new Twitter({
+  consumer_key: TW_KEY,
+  consumer_secret: TW_SECRET_KEY,
+  access_token_key: TW_ACCESS_TOKEN,
+  access_token_secret: TW_ACCESS_TOKEN_SECRET,
+});
+
+
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
 const lastBlock = null;// null  9006185; 8991065
+
+async function postEventTwitter (body) {
+  body = body.slice(0, TW_MAX_CHAR);
+  twclient.post('statuses/update', {status: body},  function(error, tweet, response) {
+    if(error) {
+      console.debug(error);
+      return;
+    }
+      console.log('tweet tweeted');
+  });
+}
+
+async function postMessage (msg_discord, msg_twitter) {
+  webhook.send(msg_discord)
+    .then(message => console.log(`Sent message on Discord.....`))
+    .catch(console.error);
+  postEventTwitter(msg_twitter)
+    .then(message => console.log(`Sent message on Twitter.....`))
+    .catch(console.error);
+}
 
 async function init () {
   // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -30,17 +66,24 @@ function displayIssue (issue) {
   return `<${issue.html_url}> (${issue.title})`
 }
 
+function displayIssueTwitter (issue) {
+  return `${issue.html_url} (${issue.title})`
+}
+
 function onTaskEvent (task) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + task.transactionHash;
 
-  const msg = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
+  const msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
 Url: ${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'not found'}
 Tx: <${etherscanlink}>
 `
-console.log('-----onTaskEvent', msg);
-  webhook.send(msg)
-    .then(message => console.log(`Sent message.....`))
-    .catch(console.error);
+  const msg_twitter = `Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}
+Tx: ${etherscanlink}
+Url: ${task.gitHubIssue ? displayIssueTwitter(task.gitHubIssue) : 'not found'}
+`
+  
+  console.log('-----onTaskEvent', msg_discord);
+  return postMessage(msg_discord, msg_twitter);
 }
 
 function onVoteEvent (data) {
@@ -54,28 +97,36 @@ function onVoteEvent (data) {
     description = data.laurel;
   }
   amount = displayLaurelAmount(amount);
-  const msg = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
+  const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
 ${data.revertedIndex ? ('Reverted: option ' + data.revertedIndex + '\n') : ''}${data.winnerIndex ? ('WINNER: option ' + data.winnerIndex + '\n') : ''}Tx: <${etherscanlink}>
 Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}
 `
-console.log('-----onVoteEvent', msg);
-  webhook.send(msg)
-    .then(message => console.log(`Sent message.....`))
-    .catch(console.error);
+  
+  const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
+${data.revertedIndex ? ('Reverted: option ' + data.revertedIndex + '\n') : ''}${data.winnerIndex ? ('WINNER: option ' + data.winnerIndex + '\n') : ''}Tx: ${etherscanlink}
+Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}
+`
+  
+  console.log('-----onVoteEvent', msg_discord);
+  return postMessage(msg_discord, msg_twitter);
 }
 
 function onClaimEvent (data) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + data.transactionHash;
 
-  const msg = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}** 
+  const msg_discord = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}** 
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}
 Tx: <${etherscanlink}>
 ${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'not found'}
 `
-console.log('-----onClaimEvent', msg);
-  webhook.send(msg)
-    .then(message => console.log(`Sent message.....`))
-    .catch(console.error);
+  const msg_twitter = `Claim ${data.optionIndex} registered by ${data.beneficiaryData}
+Tx: ${etherscanlink}
+Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
+${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'not found'}
+`
+  
+  console.log('-----onClaimEvent', msg_discord);
+  return postMessage(msg_discord, msg_twitter);
 }
 
 client.fetchWebhook(whid, whtoken)
@@ -94,5 +145,4 @@ client.fetchWebhook(whid, whtoken)
   .catch(e => console.error('errrr', e));
 
 
-console.log(TOKEN);
 client.login(TOKEN)
