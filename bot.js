@@ -52,7 +52,7 @@ function onVoteEvent (data) {
   }
   amount = displayLaurelAmount(amount);
   const msg = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
-${data.exWinnerData ? ('Reverted: ' + data.exWinnerData + '\n') : ''}${data.winnerData ? ('WINNER: ' + data.winnerData + '\n') : ''}Tx: ${etherscanlink}
+${data.revertedIndex ? ('Reverted: option ' + data.revertedIndex + '\n') : ''}${data.winnerIndex ? ('WINNER: option ' + data.winnerIndex + '\n') : ''}Tx: ${etherscanlink}
 Task Url: ${data.gitHubIssue ? data.gitHubIssue.html_url : 'not found'}
 `
 console.log('-----onVoteEvent', msg);

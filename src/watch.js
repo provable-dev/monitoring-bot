@@ -88,6 +88,16 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     const task = await getTaskData(taskid);
     const gitHubIssue = await findGitHubIssue(taskid);
     const receipt = await web3.provider.getTransactionReceipt(taskEvent.transactionHash);
+    console.log('----receipt', receipt.events);
+    const outcomes = receipt.events.filter(ev => ev.event === 'Outcome');
+    const winner = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 1);
+    const reverted = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 0);
+    
+    // winner.args.winner.toNumber()
+    // event Outcome(bytes32 indexed taskid, uint256 indexed typeOfEvent, uint256 indexed winner, uint256 optionxId, uint256 optionyId, uint256 x, uint256 y);
+    
+    
+    // && receipt.events.args , event
     const data = {
       taskid,
       optionIndex,
@@ -98,6 +108,8 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       gitHubIssue,
       voterData: volunteersMap[receipt.from] || receipt.from,
       transactionHash: taskEvent.transactionHash,
+      winnerIndex: winner ? winner.args.winner.toNumber() : undefined,
+      revertedIndex: reverted ? reverted.args.winner.toNumber(): undefined,
     }
     callbacks.onVote(data);
   }, milliseconds);
