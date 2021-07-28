@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
 var Twitter = require('twitter');
+const _FB = require('fb');
 const {ethers} = require("ethers");
+const fetch = require("node-fetch");
 const client = new Discord.Client()
 const {getTheLaurel, displayLaurelAmount} = require("./src/thelaurel");
 const {monitor} = require('./src/watch');
@@ -8,6 +10,9 @@ const {monitor} = require('./src/watch');
 let thelaurel = null;
 let web3 = null;
 let webhook = null;
+
+const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
+const lastBlock = null;// 9011467  9006185; 8991065
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
@@ -28,9 +33,45 @@ const twclient = new Twitter({
   access_token_secret: TW_ACCESS_TOKEN_SECRET,
 });
 
+const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
+let FB_ACCESS_TOKEN_LONG = process.env.FB_ACCESS_TOKEN_LONG;
+const FB_APP_ID = process.env.FB_APP_ID;
+const FB_APP_SECRET = process.env.FB_APP_SECRET;
+const {FB, Facebook, FacebookApiException} = _FB;
+const fboptions = {version: 'v10.0', accessToken: FB_ACCESS_TOKEN_LONG, appId: FB_APP_ID, appSecret: FB_APP_SECRET}
+const fbPageID = '688583115349973';
+const fbApp = new Facebook(fboptions);
+console.log('fboptions', fboptions);
+console.log('fbApp', fbApp)
 
-const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
-const lastBlock = null;// null  9006185; 8991065
+if (!fboptions.accessToken) getAccessToken();
+
+async function getAccessToken() {
+  const url = `https://graph.facebook.com/${fboptions.version}/oauth/access_token?grant_type=fb_exchange_token&client_id=${fboptions.appId}&client_secret=${fboptions.appSecret}&fb_exchange_token=${FB_ACCESS_TOKEN}`
+  console.log('url', url);
+  const token = await fetch(url).then(r => r.json()).catch(e => console.debug(e));
+  console.log('token', token);
+  // access_token
+  
+  fboptions.accessToken = token.access_token;
+  fbApp.setAccessToken(token.access_token);
+  
+  return token;
+}
+
+async function postEventFb (body) {
+  const path = `/${fbPageID}/feed`;
+  
+  if (!fboptions.accessToken) await getAccessToken();
+  
+  fbApp.api(path, 'post', { message: body }, function (res) {
+    if(!res || res.error) {
+      console.log(!res ? 'error occurred' : res.error);
+      return;
+    }
+    console.log('Post Id: ' + res.id);
+  });
+}
 
 async function postEventTwitter (body) {
   body = body.slice(0, TW_MAX_CHAR);
@@ -49,6 +90,10 @@ async function postMessage (msg_discord, msg_twitter) {
     .catch(console.error);
   postEventTwitter(msg_twitter)
     .then(message => console.log(`Sent message on Twitter.....`))
+    .catch(console.error);
+  
+  postEventFb(msg_twitter)
+    .then(message => console.log(`Sent message on Facebook.....`))
     .catch(console.error);
 }
 
