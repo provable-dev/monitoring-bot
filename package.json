@@ -9,7 +9,9 @@
   "dependencies": {
     "discord.js": "^12.5.3",
     "ethers": "^5.4.2",
-    "node-fetch": "^2.6.1"
+    "fb": "^2.0.0",
+    "node-fetch": "^2.6.1",
+    "twitter": "^1.7.1"
   },
   "engines": {
     "node": "12.x"

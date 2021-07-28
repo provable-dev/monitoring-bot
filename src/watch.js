@@ -89,7 +89,7 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     const gitHubIssue = await findGitHubIssue(taskid);
     const receipt = await web3.provider.getTransactionReceipt(taskEvent.transactionHash);
     console.log('----receipt', receipt.events);
-    const outcomes = receipt.events.filter(ev => ev.event === 'Outcome');
+    const outcomes = (receipt.events || []).filter(ev => ev.event === 'Outcome');
     const winner = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 1);
     const reverted = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 0);
     
