@@ -66,6 +66,8 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     const task = await getTaskData(taskid);
     const gitHubIssue = await findGitHubIssue(taskid);
     const optionUrl = await findClaimUrl(gitHubIssue, optionid);
+    const optionData = await thelaurel.getVotingOption(taskid, optionIndex);
+    const claimreceiver = optionData ? optionData.beneficiary : null;
     const data = {
       taskid,
       optionid,
@@ -73,7 +75,8 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       // ...task,
       laurelid: task.task.laurelid,
       laurel: laurelsMap[task.task.laurelid],
-      beneficiaryData: volunteersMap[task.beneficiary] || task.beneficiary,
+      winnerData: volunteersMap[task.beneficiary] || task.beneficiary,
+      beneficiaryData: volunteersMap[claimreceiver] || claimreceiver,
       gitHubIssue,
       optionUrl,
       transactionHash: taskEvent.transactionHash,
