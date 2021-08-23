@@ -1,6 +1,7 @@
-const {getTaskData, findGitHubIssue, findClaimUrl, laurelsMap, getVolunteersMap} = require("./thelaurel");
+const {getTaskData, findGitHubIssue, findClaimUrl, getLaurelsMap, getVolunteersMap} = require("./thelaurel");
 
 let volunteersMap = {};
+let laurelsMap = {};
 
 function watch (callback, milliseconds) {
   const intervalId = setInterval(callback, milliseconds);
@@ -44,8 +45,10 @@ function watchVotes (web3, thelaurel, lastBlock, callback, milliseconds) {
 async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 5000) {
   console.log('*****monitor START*****')
   volunteersMap = await getVolunteersMap();
+  laurelsMap = await getLaurelsMap();
   const unsubscribeTasks = await watchTasks(web3, thelaurel, lastBlock, async (taskEvent) => {
     volunteersMap = await getVolunteersMap();
+    laurelsMap = await getLaurelsMap(true);
     const taskid = taskEvent.args.taskid;
     console.log('monitor taskid', taskid);
     const task = await getTaskData(taskid);

@@ -16,30 +16,28 @@ let lastGitHubIssueCreatedAt = null;
 
 const abi = compiled.output.abi;
 
-let thelaurel;
-let laurelsMap = {};
-
-
-laurelsMap = {
-  "0x8a56885456cef1ac735c91789b54a769e819190845ae48b9d000b48d4844dbef": "Coding",
-  "0x4874b7a93fb3f4abf2f19a36e68aed8c8eafe19feca19c183abb0e437cadbcfd": "Intellectual",
-  "0xd5350be97891348dc5f3c1a61c3b11c79f6fbd861807b7e6426fcaa289c67f5a": "Physical",
-  "0x0af8a758e2e143977c734d5e012b22d6550bc58df51be42389db46d9fcb2e2e0": "Marketing",
-  "0xa7e8030f20d51298078da9ed202f23280c7cf8b6b49a999a7e9457f8f1938587": "Arbitration",
-  "CL": "0x8a56885456cef1ac735c91789b54a769e819190845ae48b9d000b48d4844dbef",
-  "IL": "0x4874b7a93fb3f4abf2f19a36e68aed8c8eafe19feca19c183abb0e437cadbcfd",
-  "PL": "0xd5350be97891348dc5f3c1a61c3b11c79f6fbd861807b7e6426fcaa289c67f5a",
-  "ML": "0x0af8a758e2e143977c734d5e012b22d6550bc58df51be42389db46d9fcb2e2e0",
-  "AL": "0xa7e8030f20d51298078da9ed202f23280c7cf8b6b49a999a7e9457f8f1938587",
-  "Coding": "0x8a56885456cef1ac735c91789b54a769e819190845ae48b9d000b48d4844dbef",
-  "Intellectual": "0x4874b7a93fb3f4abf2f19a36e68aed8c8eafe19feca19c183abb0e437cadbcfd",
-  "Physical": "0xd5350be97891348dc5f3c1a61c3b11c79f6fbd861807b7e6426fcaa289c67f5a",
-  "Marketing": "0x0af8a758e2e143977c734d5e012b22d6550bc58df51be42389db46d9fcb2e2e0",
-  "Arbitration": "0xa7e8030f20d51298078da9ed202f23280c7cf8b6b49a999a7e9457f8f1938587",
+let thelaurel, laurelsMap;
+const abbrev = {
+  "CL": "Coding",
+  "IL": "Intellectual",
+  "PL": "Physical",
+  "ML": "Marketing",
+  "AL": "Arbitration",
 }
 
 const getVolunteersMap = () => fetch(_volunteersMap).then(r => r.json());
-const getLaurelsMap = () => fetch(_laurelsMap).then(r => r.json());
+const getLaurelsMap = async (update = false) => {
+  if (!update && laurelsMap) return laurelsMap;
+  
+  laurelsMap = await fetch(_laurelsMap).then(r => r.json());
+  for (let addr in laurelsMap) {
+    laurelsMap[laurelsMap[addr]] = addr;
+  }
+  for (let abv in abbrev) {
+    laurelsMap[abv] = laurelsMap[abbrev[abv]];
+  }
+  return laurelsMap;
+}
 const getAbi = () => fetch(contractData).then(r => r.json()).then(r => r.output.abi);
 
 function fetchGithub (path, q) {
@@ -131,6 +129,6 @@ module.exports = {
   getTaskData,
   findGitHubIssue,
   findClaimUrl,
-  laurelsMap,
+  getLaurelsMap,
   getVolunteersMap,
 }
