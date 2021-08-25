@@ -116,7 +116,8 @@ async function findGitHubIssue (taskid) {
 async function findClaimUrl (issue, optionid) {
   const comms = await fetch(issue.comments_url).then(r => r.json());
   if (comms.length == 0) return;
-  const text = comms[0].body;
+  const claimProofComment = comms.find(v => v.body.includes('[CLAIM PROOF]'));
+  const text = claimProofComment ? claimProofComment.html_url : comms[0].body;
   const hash = ethers.utils.solidityKeccak256(["string"], [text]);
   if (optionid === hash) return text;
 }
