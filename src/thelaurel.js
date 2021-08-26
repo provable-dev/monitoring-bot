@@ -42,7 +42,7 @@ const getAbi = () => fetch(contractData).then(r => r.json()).then(r => r.output.
 
 function fetchGithub (path, q) {
   const query = Object.keys(q).map(key => `${key}=${q[key]}`).join('&');
-  return fetch('https://api.github.com' + path + '?' + query).then(r => r.json());
+  return fetch('https://api.github.com' + path + '?' + query).then(r => r.json()).catch(e => []);
 }
 
 async function getTheLaurel (web3, address) {
@@ -104,6 +104,10 @@ async function findGitHubIssue (taskid) {
   if (lastGitHubIssueCreatedAt) q.since = lastGitHubIssueCreatedAt;
   const issues = await fetchGithub(`/repos/${laurelsRepo}/issues`, q);
   if (!issues || issues.length === 0) return;
+  if (!(issues instanceof Array)) {
+    console.warn('issues is not an array', issues);
+    return;
+  }
   const tasks = issues.map(v => getTaskFromIssue(v));
   for (const t of tasks) {
     cacheGitHubIssues[t.taskid] = t;

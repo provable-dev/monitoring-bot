@@ -53,7 +53,10 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     console.log('monitor taskid', taskid);
     const task = await getTaskData(taskid);
     console.log('monitor task', task);
-    const gitHubIssue = await findGitHubIssue(taskid);
+    let gitHubIssue = await findGitHubIssue(taskid);
+    if (!gitHubIssue && laurelsMap[taskid]) {
+      gitHubIssue = {title: `Created laurel: ${laurelsMap[taskid]}`};
+    }
     const data = {
       ...task,
       laurelid: task.task.laurelid,
@@ -71,7 +74,10 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     const {taskid, optionid, optionIndex} = taskEvent.args;
     console.log('monitor claim: taskid', taskid, optionIndex);
     const task = await getTaskData(taskid);
-    const gitHubIssue = await findGitHubIssue(taskid);
+    let gitHubIssue = await findGitHubIssue(taskid);
+    if (!gitHubIssue && laurelsMap[taskid]) {
+      gitHubIssue = {title: `New coefficient for ${laurelsMap[taskid]}: ${optionid} `};
+    }
     const optionUrl = await findClaimUrl(gitHubIssue, optionid);
     const optionData = await thelaurel.getVotingOption(taskid, optionIndex);
     const claimreceiver = optionData ? optionData.beneficiary : null;
