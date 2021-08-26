@@ -106,6 +106,7 @@ async function findGitHubIssue (taskid) {
   if (!issues || issues.length === 0) return;
   if (!(issues instanceof Array)) {
     console.warn('issues is not an array', issues);
+    return;
   }
   const tasks = issues.map(v => getTaskFromIssue(v));
   for (const t of tasks) {
