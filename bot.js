@@ -184,7 +184,7 @@ client.fetchWebhook(whid, whtoken)
         onTaskRegistered: onTaskEvent,
         onClaim: onClaimEvent,
         onVote: onVoteEvent,
-      }, 10000)
+      }, 20000)
     });
   })
   .catch(e => console.error('errrr', e));
