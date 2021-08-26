@@ -103,6 +103,7 @@ async function findGitHubIssue (taskid) {
   const q = {per_page: 100};
   if (lastGitHubIssueCreatedAt) q.since = lastGitHubIssueCreatedAt;
   const issues = await fetchGithub(`/repos/${laurelsRepo}/issues`, q);
+  if (!issues || issues.length === 0) return;
   const tasks = issues.map(v => getTaskFromIssue(v));
   for (const t of tasks) {
     cacheGitHubIssues[t.taskid] = t;
