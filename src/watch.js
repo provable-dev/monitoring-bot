@@ -102,7 +102,10 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     const {taskid, optionIndex, WL, AL, weight} = taskEvent.args;
     console.log('monitor vote: taskid', taskid, optionIndex);
     const task = await getTaskData(taskid);
-    const gitHubIssue = await findGitHubIssue(taskid);
+    let gitHubIssue = await findGitHubIssue(taskid);
+    if (!gitHubIssue && laurelsMap[taskid]) {
+      gitHubIssue = {title: `Vote on coefficient for ${laurelsMap[taskid]}`};
+    }
     const receipt = await web3.provider.getTransactionReceipt(taskEvent.transactionHash);
     console.log('----receipt', receipt.events);
     const outcomes = (receipt.events || []).filter(ev => ev.event === 'Outcome');
