@@ -106,17 +106,18 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
     if (!gitHubIssue && laurelsMap[taskid]) {
       gitHubIssue = {title: `Vote on coefficient for ${laurelsMap[taskid]}`};
     }
+    const optionData = await thelaurel.getVotingOption(taskid, optionIndex);
+    const claimreceiver = optionData ? optionData.beneficiary : null;
+    
     const receipt = await web3.provider.getTransactionReceipt(taskEvent.transactionHash);
-    console.log('----receipt', receipt.events);
-    const outcomes = (receipt.events || []).filter(ev => ev.event === 'Outcome');
+    const outcomes = (receipt.logs || []).map(ev => {
+      const parsedEv = thelaurel.interface.parseLog(ev);
+      return parsedEv;
+    }).filter(ev => ev.name === 'Outcome');
+    
     const winner = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 1);
     const reverted = outcomes.find(ev => ev.args.typeOfEvent.toNumber() == 0);
     
-    // winner.args.winner.toNumber()
-    // event Outcome(bytes32 indexed taskid, uint256 indexed typeOfEvent, uint256 indexed winner, uint256 optionxId, uint256 optionyId, uint256 x, uint256 y);
-    
-    
-    // && receipt.events.args , event
     const data = {
       taskid,
       optionIndex,
@@ -126,6 +127,7 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       laurel: laurelsMap[task.task.laurelid],
       gitHubIssue,
       voterData: volunteersMap[receipt.from] || receipt.from,
+      beneficiaryData: volunteersMap[claimreceiver] || claimreceiver,
       transactionHash: taskEvent.transactionHash,
       winnerIndex: winner ? winner.args.winner.toNumber() : undefined,
       revertedIndex: reverted ? reverted.args.winner.toNumber(): undefined,

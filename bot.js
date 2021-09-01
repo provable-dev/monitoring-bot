@@ -3,6 +3,7 @@ var Twitter = require('twitter');
 const _FB = require('fb');
 const {ethers} = require("ethers");
 const fetch = require("node-fetch");
+const { request } = require("@octokit/request");
 const client = new Discord.Client()
 const {getTheLaurel, displayLaurelAmount} = require("./src/thelaurel");
 const {monitor} = require('./src/watch');
@@ -11,8 +12,9 @@ let thelaurel = null;
 let web3 = null;
 let webhook = null;
 
+const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
-const lastBlock = null;// 9011467  9006185; 8991065
+const lastBlock = null; // 9011467  9006185; 8991065
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
@@ -41,16 +43,25 @@ const {FB, Facebook, FacebookApiException} = _FB;
 const fboptions = {version: 'v10.0', accessToken: FB_ACCESS_TOKEN_LONG, appId: FB_APP_ID, appSecret: FB_APP_SECRET}
 const fbPageID = '688583115349973';
 const fbApp = new Facebook(fboptions);
-console.log('fboptions', fboptions);
-console.log('fbApp', fbApp)
+// console.log('fboptions', fboptions);
+// console.log('fbApp', fbApp)
 
 if (!fboptions.accessToken) getAccessToken();
+
+// only for triage
+const GITHUB_PERSONAL_TOKEN = process.env.GITHUB_PERSONAL_TOKEN;
+
+const authorizedGithubRequest = request.defaults({
+    headers: {
+      authorization: `token ${GITHUB_PERSONAL_TOKEN}`,
+    },
+});
 
 async function getAccessToken() {
   const url = `https://graph.facebook.com/${fboptions.version}/oauth/access_token?grant_type=fb_exchange_token&client_id=${fboptions.appId}&client_secret=${fboptions.appSecret}&fb_exchange_token=${FB_ACCESS_TOKEN}`
   console.log('url', url);
   const token = await fetch(url).then(r => r.json()).catch(e => console.debug(e));
-  console.log('token', token);
+  // console.log('token', token);
   // access_token
   
   fboptions.accessToken = token.access_token;
@@ -95,6 +106,25 @@ async function postMessage (msg_discord, msg_twitter) {
   postEventFb(msg_twitter)
     .then(message => console.log(`Sent message on Facebook.....`))
     .catch(console.error);
+}
+
+async function closeGitHubIssue (issueData) {
+  if (issueData.state === 'closed') return;
+  const request = `PATCH /repos/${volunteerRepo}/issues/${issueData.number}`;
+  const data = {state: 'closed'};
+  return authorizedGithubRequest(request, data).catch(e => console.error(e));
+  
+}
+
+async function reopenGitHubIssue (issueData) {
+  if (issueData.state !== 'closed') return;
+  const request = `PATCH /repos/${volunteerRepo}/issues/${issueData.number}`;
+  const data = {state: 'open'};
+  return authorizedGithubRequest(request, data).catch(e => console.error(e));
+}
+
+async function assignGitHubIssue (issueData) {
+  
 }
 
 async function init () {
@@ -142,17 +172,29 @@ function onVoteEvent (data) {
     description = data.laurel;
   }
   amount = displayLaurelAmount(amount);
+  
+  console.log('winnerIndex', data.winnerIndex, data.revertedIndex);
+  const {winnerIndex, revertedIndex} = data;
+  const winnerText = `${(revertedIndex || revertedIndex === 0)  ? ('Reverted: option ' + revertedIndex + '\n') : ''}${(winnerIndex || winnerIndex === 0) ? ('WINNER: option ' + winnerIndex + '\n') : ''}`;
+  
   const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
-${data.revertedIndex ? ('Reverted: option ' + data.revertedIndex + '\n') : ''}${data.winnerIndex ? ('WINNER: option ' + data.winnerIndex + '\n') : ''}Tx: <${etherscanlink}>
+${winnerText}Tx: <${etherscanlink}>
 Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}
 `
   
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
-${data.revertedIndex ? ('Reverted: option ' + data.revertedIndex + '\n') : ''}${data.winnerIndex ? ('WINNER: option ' + data.winnerIndex + '\n') : ''}Tx: ${etherscanlink}
+${winnerText}Tx: ${etherscanlink}
 Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}
 `
   
   console.log('-----onVoteEvent', msg_discord);
+  
+  if (data.winnerIndex) {
+    // TODO
+    // assignGitHubIssue(data.gitHubIssue, githubHandle);
+    closeGitHubIssue(data.gitHubIssue);
+  }
+  
   return postMessage(msg_discord, msg_twitter);
 }
 
@@ -171,6 +213,9 @@ ${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'not f
 `
   
   console.log('-----onClaimEvent', msg_discord);
+  
+  reopenGitHubIssue(data.gitHubIssue);
+  
   return postMessage(msg_discord, msg_twitter);
 }
 
