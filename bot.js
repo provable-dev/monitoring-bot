@@ -156,7 +156,7 @@ Tx: <${etherscanlink}>
 Tx: ${etherscanlink}
 Url: ${task.gitHubIssue ? displayIssueTwitter(task.gitHubIssue) : 'not found'}
 `
-  const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmdzB48faGpTVZLjPAZA6jLjhZGbdSmX9vN3vcaf5n7MBy?issue='
+  const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmQTMz8TR2vcCXfg1FJUu1QPu61neuzs98YW64L9ULv1hw&issue='
   msg_discord = task.gitHubIssue ? (msg_discord + `Claim Url: ${LINK_CLAIM}${task.gitHubIssue.number}`) : msg_discord
   console.log('-----onTaskEvent', msg_discord);
   return postMessage(msg_discord, msg_twitter);
