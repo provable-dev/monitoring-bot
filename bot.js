@@ -148,7 +148,7 @@ function displayIssueTwitter (issue) {
 function onTaskEvent (task) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + task.transactionHash;
 
-  const msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
+  let  msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
 Url: ${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'not found'}
 Tx: <${etherscanlink}>
 `
@@ -156,7 +156,8 @@ Tx: <${etherscanlink}>
 Tx: ${etherscanlink}
 Url: ${task.gitHubIssue ? displayIssueTwitter(task.gitHubIssue) : 'not found'}
 `
-  
+  const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmQTMz8TR2vcCXfg1FJUu1QPu61neuzs98YW64L9ULv1hw&issue='
+  msg_discord = task.gitHubIssue ? (msg_discord + `Claim Url: ${LINK_CLAIM}${task.gitHubIssue.number}`) : msg_discord
   console.log('-----onTaskEvent', msg_discord);
   return postMessage(msg_discord, msg_twitter);
 }
