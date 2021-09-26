@@ -108,9 +108,7 @@ async function findGitHubIssue (taskid) {
     console.warn('issues is not an array', issues);
     return;
   }
-  console.log('taskid', taskid);
   const tasks = issues.map(v => getTaskFromIssue(v));
-  console.log(tasks.map(task => task.taskid));
   for (const t of tasks) {
     cacheGitHubIssues[t.taskid] = t;
   }
