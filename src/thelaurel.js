@@ -100,7 +100,7 @@ async function getTaskData (taskid) {
 
 async function findGitHubIssue (taskid) {
   if (cacheGitHubIssues[taskid]) return cacheGitHubIssues[taskid];
-  const q = {per_page: 100};
+  const q = {per_page: 100, state: 'all'};
   if (lastGitHubIssueCreatedAt) q.since = lastGitHubIssueCreatedAt;
   const issues = await fetchGithub(`/repos/${laurelsRepo}/issues`, q);
   if (!issues || issues.length === 0) return;
