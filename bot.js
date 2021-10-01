@@ -211,6 +211,7 @@ ${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'not found'}
 Tx: ${etherscanlink}
 Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
 ${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'not found'}
+Medal: https://provable.dev/medals/?volunteer=${data.beneficiaryData}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
 `
   
   console.log('-----onClaimEvent', msg_discord);
