@@ -64,6 +64,7 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       organizerData: volunteersMap[task.task.organizer],
       beneficiaryData: volunteersMap[task.beneficiary] || task.beneficiary,
       gitHubIssue,
+      blockNumber:await web3.provider.getBlockNumber(),
       transactionHash: taskEvent.transactionHash,
     }
     callbacks.onTaskRegistered(data);
