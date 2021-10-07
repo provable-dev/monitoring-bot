@@ -14,7 +14,7 @@ let webhook = null;
 
 const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
-const lastBlock = null; // 9011467  9006185; 8991065
+const lastBlock = 9011467; // 9011467  9006185; 8991065
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
@@ -181,12 +181,14 @@ function onVoteEvent (data) {
   const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
 ${winnerText}Tx: <${etherscanlink}>
 Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}
-`
+Medal: https://provable.dev/medals/?volunteer=${data.beneficiaryData}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
+
   
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
 ${winnerText}Tx: ${etherscanlink}
 Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}
-`
+`Medal: https://provable.dev/medals/?volunteer=${data.beneficiaryData}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
+
   
   console.log('-----onVoteEvent', msg_discord);
   
@@ -206,12 +208,13 @@ function onClaimEvent (data) {
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}
 Tx: <${etherscanlink}>
 ${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'not found'}
+Medal: https://provable.dev/medals/?volunteer=${data.beneficiaryData}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
+
 `
   const msg_twitter = `Claim ${data.optionIndex} registered by ${data.beneficiaryData}
 Tx: ${etherscanlink}
 Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
 ${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'not found'}
-Medal: https://provable.dev/medals/?volunteer=${data.beneficiaryData}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
 `
   
   console.log('-----onClaimEvent', msg_discord);
