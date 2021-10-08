@@ -1,3 +1,2 @@
-# Get Started!
+# The Laurel Monitoring Bot
 
-Add files and start typing 🎉
