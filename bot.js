@@ -14,7 +14,7 @@ let webhook = null;
 
 const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
-const lastBlock = null; // 9011467  9006185; 8991065
+const lastBlock = 9429400; // 9011467  9006185; 8991065
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
@@ -178,17 +178,17 @@ function onVoteEvent (data) {
   const {winnerIndex, revertedIndex} = data;
   const winnerText = `${(revertedIndex || revertedIndex === 0)  ? ('Reverted: option ' + revertedIndex + '\n') : ''}${(winnerIndex || winnerIndex === 0) ? ('WINNER: option ' + winnerIndex + '\n') : ''}`;
   
+  const medalText = winnerIndex ? `
+  Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}` : '';
+
   const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
-${winnerText}Tx: <${etherscanlink}>
-Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}
-Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
-`
-  
+  ${winnerText}Tx: <${etherscanlink}>
+  Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}${medalText}
+  `
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
-${winnerText}Tx: ${etherscanlink}
-Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}
-Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
-`
+  ${winnerText}Tx: ${etherscanlink}
+  Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}${medalText}
+  `
   
   console.log('-----onVoteEvent', msg_discord);
   
