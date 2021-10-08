@@ -150,12 +150,12 @@ function onTaskEvent (task) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + task.transactionHash;
 
   let  msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
-${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'ID: '+task.taskid}
+${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'ID: '+ task.taskid}
 Tx: <${etherscanlink}>
 `
   const msg_twitter = `Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}
 Tx: ${etherscanlink}
-${task.gitHubIssue ? 'Url: '+displayIssueTwitter(task.gitHubIssue) : task.taskid}
+${task.gitHubIssue ? 'Url: ' + displayIssueTwitter(task.gitHubIssue) : task.taskid}
 `
   msg_discord = task.gitHubIssue ? (msg_discord + `Claim Url: <${LINK_CLAIM}&issue=${task.gitHubIssue.number}>`) : msg_discord;
   console.log('-----onTaskEvent', msg_discord);
@@ -183,12 +183,12 @@ function onVoteEvent (data) {
 
   const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
   ${winnerText}Tx: <${etherscanlink}>
-  ${data.gitHubIssue ? 'Task Url: ' + displayIssue(data.gitHubIssue) : 'ID: '+data.taskid}${medalText}
+  ${data.gitHubIssue ? 'Task Url: ' + displayIssue(data.gitHubIssue) : 'ID: ' + data.taskid}${medalText}
   `
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
   ${winnerText}Tx: ${etherscanlink}
   ${medalText}
-  ${data.gitHubIssue ? 'Task Url: ' + displayIssueTwitter(data.gitHubIssue) : 'ID: '+data.taskid}
+  ${data.gitHubIssue ? 'Task Url: ' + displayIssueTwitter(data.gitHubIssue) : 'ID: ' + data.taskid}
   `
   
   console.log('-----onVoteEvent', msg_discord);
@@ -208,12 +208,12 @@ function onClaimEvent (data) {
   const msg_discord = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}** 
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}
 Tx: <${etherscanlink}>
-${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'ID: '+data.taskid}
+${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'ID: '+ data.taskid}
 `
   const msg_twitter = `Claim ${data.optionIndex} registered by ${data.beneficiaryData}
 Tx: ${etherscanlink}
 Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
-${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'ID: '+data.taskid}
+${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'ID: '+ data.taskid}
 `
   
   console.log('-----onClaimEvent', msg_discord);
