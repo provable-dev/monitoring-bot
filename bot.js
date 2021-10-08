@@ -183,7 +183,7 @@ function onVoteEvent (data) {
 
   const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
   ${winnerText}Tx: <${etherscanlink}>
-  Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'ID: '+data.taskid}${medalText}
+  ${data.gitHubIssue ? 'Task Url: ' + displayIssue(data.gitHubIssue) : 'ID: '+data.taskid}${medalText}
   `
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
   ${winnerText}Tx: ${etherscanlink}
