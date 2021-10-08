@@ -150,7 +150,7 @@ function onTaskEvent (task) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + task.transactionHash;
 
   let  msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
-${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'ID: '+ task.taskid}
+${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'ID: ' + task.taskid}
 Tx: <${etherscanlink}>
 `
   const msg_twitter = `Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}
