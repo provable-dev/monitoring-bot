@@ -88,12 +88,10 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       // ...task,
       laurelid: task.task.laurelid,
       laurel: laurelsMap[task.task.laurelid],
-      claimreceiver: claimreceiver,
       winnerData: volunteersMap[task.beneficiary] || task.beneficiary,
       beneficiaryData: volunteersMap[claimreceiver] || claimreceiver,
       gitHubIssue,
       optionUrl,
-      blockNumber:await web3.provider.getBlockNumber(),
       transactionHash: taskEvent.transactionHash,
     }
     callbacks.onClaim(data);
@@ -129,7 +127,7 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       laurel: laurelsMap[task.task.laurelid],
       gitHubIssue,
       claimreceiver: claimreceiver,
-      blockNumber:await web3.provider.getBlockNumber(),
+      blockNumber: await web3.provider.getBlockNumber(),
       voterData: volunteersMap[receipt.from] || receipt.from,
       beneficiaryData: volunteersMap[claimreceiver] || claimreceiver,
       transactionHash: taskEvent.transactionHash,
