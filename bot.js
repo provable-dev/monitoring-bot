@@ -187,9 +187,10 @@ function onVoteEvent (data) {
   `
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
   ${winnerText}Tx: ${etherscanlink}
-  ${medalText}
   ${data.gitHubIssue ? 'Task Url: ' + displayIssueTwitter(data.gitHubIssue) : 'ID: ' + data.taskid}
-  `
+  ${medalText}
+  
+`
   
   console.log('-----onVoteEvent', msg_discord);
   
