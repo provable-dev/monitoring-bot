@@ -14,7 +14,7 @@ let webhook = null;
 
 const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
-const lastBlock = 9429400; // 9011467  9006185; 8991065
+const lastBlock = null; // 9011467  9006185; 8991065
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
