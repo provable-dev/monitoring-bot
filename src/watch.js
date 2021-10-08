@@ -89,18 +89,12 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       // ...task,
       laurelid: task.task.laurelid,
       laurel: laurelsMap[task.task.laurelid],
-<<<<<<< HEAD
       claimreceiver:claimreceiver,
-=======
->>>>>>> 328371611fa257ab4f9ed51d2c62680b79528d86
       winnerData: volunteersMap[task.beneficiary] || task.beneficiary,
       beneficiaryData: volunteersMap[claimreceiver] || claimreceiver,
       gitHubIssue,
       optionUrl,
-<<<<<<< HEAD
       blockNumber:await web3.provider.getBlockNumber(),
-=======
->>>>>>> 328371611fa257ab4f9ed51d2c62680b79528d86
       transactionHash: taskEvent.transactionHash,
     }
     callbacks.onClaim(data);
@@ -135,11 +129,8 @@ async function monitor (web3, thelaurel, lastBlock, callbacks, milliseconds = 50
       laurelid: task.task.laurelid,
       laurel: laurelsMap[task.task.laurelid],
       gitHubIssue,
-<<<<<<< HEAD
       claimreceiver:claimreceiver,
       blockNumber:await web3.provider.getBlockNumber(),
-=======
->>>>>>> 328371611fa257ab4f9ed51d2c62680b79528d86
       voterData: volunteersMap[receipt.from] || receipt.from,
       beneficiaryData: volunteersMap[claimreceiver] || claimreceiver,
       transactionHash: taskEvent.transactionHash,

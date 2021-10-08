@@ -186,10 +186,6 @@ Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
 ${winnerText}Tx: ${etherscanlink}
 Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}
-<<<<<<< HEAD
-
-=======
->>>>>>> 328371611fa257ab4f9ed51d2c62680b79528d86
 `
   
   console.log('-----onVoteEvent', msg_discord);
@@ -210,20 +206,13 @@ function onClaimEvent (data) {
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}
 Tx: <${etherscanlink}>
 ${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'not found'}
-<<<<<<< HEAD
 Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
-=======
->>>>>>> 328371611fa257ab4f9ed51d2c62680b79528d86
 `
   const msg_twitter = `Claim ${data.optionIndex} registered by ${data.beneficiaryData}
 Tx: ${etherscanlink}
 Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
 ${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'not found'}
-<<<<<<< HEAD
 Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
-=======
-Medal: https://provable.dev/medals/?volunteer=${data.beneficiaryData}&taskid=${data.taskid}&blockNumber=${data.blockNumber}
->>>>>>> 328371611fa257ab4f9ed51d2c62680b79528d86
 `
   
   console.log('-----onClaimEvent', msg_discord);
