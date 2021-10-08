@@ -14,6 +14,7 @@ let webhook = null;
 
 const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
+const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmXcsaUDCQDvGQiZnnJtxiuAPe2DgSbxa4dr1XUtnmTjLu';
 const lastBlock = null; // 9011467  9006185; 8991065
 
 const TOKEN = process.env.DISCORD_TOKEN;
@@ -156,8 +157,7 @@ Tx: <${etherscanlink}>
 Tx: ${etherscanlink}
 Url: ${task.gitHubIssue ? displayIssueTwitter(task.gitHubIssue) : 'not found'}
 `
-  const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmQTMz8TR2vcCXfg1FJUu1QPu61neuzs98YW64L9ULv1hw&issue='
-  msg_discord = task.gitHubIssue ? (msg_discord + `Claim Url: ${LINK_CLAIM}${task.gitHubIssue.number}`) : msg_discord
+  msg_discord = task.gitHubIssue ? (msg_discord + `Claim Url: <${LINK_CLAIM}&issue=${task.gitHubIssue.number}>`) : msg_discord;
   console.log('-----onTaskEvent', msg_discord);
   return postMessage(msg_discord, msg_twitter);
 }
