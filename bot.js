@@ -150,7 +150,7 @@ function onTaskEvent (task) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + task.transactionHash;
 
   let  msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
-Url: ${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'ID: '+task.taskid}
+${task.gitHubIssue ? displayIssue(task.gitHubIssue) : 'ID: '+task.taskid}
 Tx: <${etherscanlink}>
 `
   const msg_twitter = `Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}
@@ -187,7 +187,8 @@ function onVoteEvent (data) {
   `
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
   ${winnerText}Tx: ${etherscanlink}
-  ${data.gitHubIssue ? 'Task Url: ' + displayIssueTwitter(data.gitHubIssue) : 'ID: '+data.taskid}${medalText}
+  ${medalText}
+  ${data.gitHubIssue ? 'Task Url: ' + displayIssueTwitter(data.gitHubIssue) : 'ID: '+data.taskid}
   `
   
   console.log('-----onVoteEvent', msg_discord);
