@@ -178,15 +178,17 @@ function onVoteEvent (data) {
   const {winnerIndex, revertedIndex} = data;
   const winnerText = `${(revertedIndex || revertedIndex === 0)  ? ('Reverted: option ' + revertedIndex + '\n') : ''}${(winnerIndex || winnerIndex === 0) ? ('WINNER: option ' + winnerIndex + '\n') : ''}`;
   
+  const medalText = winnerIndex ? `
+  Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}` : '';
+
   const msg_discord = `**Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}**
-${winnerText}Tx: <${etherscanlink}>
-Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}
-`
-  
+  ${winnerText}Tx: <${etherscanlink}>
+  Task Url: ${data.gitHubIssue ? displayIssue(data.gitHubIssue) : 'not found'}${medalText}
+  `
   const msg_twitter = `Vote by ${data.voterData} with ${amount} ${description} (weight ${data.weight}) for option ${data.optionIndex}
-${winnerText}Tx: ${etherscanlink}
-Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}
-`
+  ${winnerText}Tx: ${etherscanlink}
+  Task Url: ${data.gitHubIssue ? displayIssueTwitter(data.gitHubIssue) : 'not found'}${medalText}
+  `
   
   console.log('-----onVoteEvent', msg_discord);
   
