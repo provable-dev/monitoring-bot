@@ -208,12 +208,12 @@ function onClaimEvent (data) {
   const msg_discord = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}** 
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}
 Tx: <${etherscanlink}>
-${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'ID: '+ data.taskid}
+${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'ID: ' + data.taskid}
 `
   const msg_twitter = `Claim ${data.optionIndex} registered by ${data.beneficiaryData}
 Tx: ${etherscanlink}
 Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
-${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'ID: '+ data.taskid}
+${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'ID: ' + data.taskid}
 `
   
   console.log('-----onClaimEvent', msg_discord);
