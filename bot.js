@@ -16,7 +16,7 @@ let webhook = null;
 const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
 const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmXcsaUDCQDvGQiZnnJtxiuAPe2DgSbxa4dr1XUtnmTjLu';
-const lastBlock = process.env.LASTBLOCK;
+const lastBlock = parseInt(process.env.LASTBLOCK);
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
@@ -37,18 +37,18 @@ const twclient = new Twitter({
   access_token_secret: TW_ACCESS_TOKEN_SECRET,
 });
 
-const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
-let FB_ACCESS_TOKEN_LONG = process.env.FB_ACCESS_TOKEN_LONG;
-const FB_APP_ID = process.env.FB_APP_ID;
-const FB_APP_SECRET = process.env.FB_APP_SECRET;
-const {FB, Facebook, FacebookApiException} = _FB;
-const fboptions = {version: 'v10.0', accessToken: FB_ACCESS_TOKEN_LONG, appId: FB_APP_ID, appSecret: FB_APP_SECRET}
-const fbPageID = '688583115349973';
-const fbApp = new Facebook(fboptions);
+// const FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
+// let FB_ACCESS_TOKEN_LONG = process.env.FB_ACCESS_TOKEN_LONG;
+// const FB_APP_ID = process.env.FB_APP_ID;
+// const FB_APP_SECRET = process.env.FB_APP_SECRET;
+// const {FB, Facebook, FacebookApiException} = _FB;
+// const fboptions = {version: 'v10.0', accessToken: FB_ACCESS_TOKEN_LONG, appId: FB_APP_ID, appSecret: FB_APP_SECRET}
+// const fbPageID = '688583115349973';
+// const fbApp = new Facebook(fboptions);
 // console.log('fboptions', fboptions);
 // console.log('fbApp', fbApp)
 
-if (!fboptions.accessToken) getAccessToken();
+// if (!fboptions.accessToken) getFacebookAccessToken();
 
 // only for triage
 const GITHUB_PERSONAL_TOKEN = process.env.GITHUB_PERSONAL_TOKEN;
@@ -59,24 +59,24 @@ const authorizedGithubRequest = request.defaults({
     },
 });
 
-async function getAccessToken() {
+async function getFacebookAccessToken() {
   const url = `https://graph.facebook.com/${fboptions.version}/oauth/access_token?grant_type=fb_exchange_token&client_id=${fboptions.appId}&client_secret=${fboptions.appSecret}&fb_exchange_token=${FB_ACCESS_TOKEN}`
   console.log('url', url);
   const token = await fetch(url).then(r => r.json()).catch(e => console.debug(e));
   // console.log('token', token);
   // access_token
-  
+
   fboptions.accessToken = token.access_token;
   fbApp.setAccessToken(token.access_token);
-  
+
   return token;
 }
 
 async function postEventFb (body) {
   const path = `/${fbPageID}/feed`;
-  
-  if (!fboptions.accessToken) await getAccessToken();
-  
+
+  if (!fboptions.accessToken) await getFacebookAccessToken();
+
   fbApp.api(path, 'post', { message: body }, function (res) {
     if(!res || res.error) {
       console.log(!res ? 'error occurred' : res.error);
@@ -104,10 +104,10 @@ async function postMessage (msg_discord, msg_twitter) {
   postEventTwitter(msg_twitter)
     .then(message => console.log(`Sent message on Twitter.....`))
     .catch(console.error);
-  
-  postEventFb(msg_twitter)
-    .then(message => console.log(`Sent message on Facebook.....`))
-    .catch(console.error);
+
+  // postEventFb(msg_twitter)
+  //   .then(message => console.log(`Sent message on Facebook.....`))
+  //   .catch(console.error);
 }
 
 async function closeGitHubIssue (issueData) {
@@ -115,7 +115,7 @@ async function closeGitHubIssue (issueData) {
   const request = `PATCH /repos/${volunteerRepo}/issues/${issueData.number}`;
   const data = {state: 'closed'};
   return authorizedGithubRequest(request, data).catch(e => console.error(e));
-  
+
 }
 
 async function reopenGitHubIssue (issueData) {
@@ -126,7 +126,7 @@ async function reopenGitHubIssue (issueData) {
 }
 
 async function assignGitHubIssue (issueData) {
-  
+
 }
 
 async function init () {
@@ -174,11 +174,11 @@ function onVoteEvent (data) {
     description = data.laurel;
   }
   amount = displayLaurelAmount(amount);
-  
+
   console.log('winnerIndex', data.winnerIndex, data.revertedIndex);
   const {winnerIndex, revertedIndex} = data;
   const winnerText = `${(revertedIndex || revertedIndex === 0)  ? ('Reverted: option ' + revertedIndex + '\n') : ''}${(winnerIndex || winnerIndex === 0) ? ('WINNER: option ' + winnerIndex + '\n') : ''}`;
-  
+
   const medalText = winnerIndex ? `
   Medal: https://provable.dev/medals/?volunteer=${data.claimreceiver}&taskid=${data.taskid}&blockNumber=${data.blockNumber}` : '';
 
@@ -190,24 +190,24 @@ function onVoteEvent (data) {
   ${winnerText}Tx: ${etherscanlink}
   ${data.gitHubIssue ? 'Task Url: ' + displayIssueTwitter(data.gitHubIssue) : 'ID: ' + data.taskid}
   ${medalText}
-  
+
 `
-  
+
   console.log('-----onVoteEvent', msg_discord);
-  
+
   if (data.winnerIndex) {
     // TODO
     // assignGitHubIssue(data.gitHubIssue, githubHandle);
     closeGitHubIssue(data.gitHubIssue);
   }
-  
+
   return postMessage(msg_discord, msg_twitter);
 }
 
 function onClaimEvent (data) {
   const etherscanlink = `https://rinkeby.etherscan.io/tx/` + data.transactionHash;
 
-  const msg_discord = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}** 
+  const msg_discord = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}**
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}
 Tx: <${etherscanlink}>
 ${data.gitHubIssue ? ("Task: " + displayIssue(data.gitHubIssue)) : 'ID: ' + data.taskid}
@@ -217,11 +217,11 @@ Tx: ${etherscanlink}
 Proof Url: ${data.optionUrl ? (data.optionUrl) : 'not found'}
 ${data.gitHubIssue ? ("Task: " + displayIssueTwitter(data.gitHubIssue)) : 'ID: ' + data.taskid}
 `
-  
+
   console.log('-----onClaimEvent', msg_discord);
-  
+
   reopenGitHubIssue(data.gitHubIssue);
-  
+
   return postMessage(msg_discord, msg_twitter);
 }
 
