@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Discord = require("discord.js");
 var Twitter = require('twitter');
 const _FB = require('fb');
@@ -15,7 +16,7 @@ let webhook = null;
 const volunteerRepo = 'the-laurel/laurels';
 const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
 const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmXcsaUDCQDvGQiZnnJtxiuAPe2DgSbxa4dr1XUtnmTjLu';
-const lastBlock = null; // 9011467  9006185; 8991065
+const lastBlock = process.env.LASTBLOCK;
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
