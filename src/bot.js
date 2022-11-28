@@ -113,7 +113,6 @@ async function postMessage (msg_discord, msg_twitter) {
 }
 
 async function closeGitHubIssue (issueData) {
-  console.log('---issueData', issueData);
   if (issueData.state === 'closed') return;
   const request = `PATCH /repos/${volunteerRepo}/issues/${issueData.number}`;
   const data = {state: 'closed'};
