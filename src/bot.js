@@ -6,17 +6,19 @@ const {ethers} = require("ethers");
 const fetch = require("node-fetch");
 const { request } = require("@octokit/request");
 const client = new Discord.Client()
-const {getTheLaurel, displayLaurelAmount} = require("./src/thelaurel");
-const {monitor} = require('./src/watch');
+const {getTheLaurel, displayLaurelAmount} = require("./thelaurel");
+const {monitor} = require('./watch');
 
 let thelaurel = null;
 let web3 = null;
 let webhook = null;
 
 const volunteerRepo = 'the-laurel/laurels';
-const address = "0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82"
+const address = "0xf4986e1b3FBBc1A823878123adA9E2d359c0a596"
 const LINK_CLAIM = 'https://mark.provable.dev/?ipfs=QmXcsaUDCQDvGQiZnnJtxiuAPe2DgSbxa4dr1XUtnmTjLu';
 const lastBlock = parseInt(process.env.LASTBLOCK);
+const RPC_PROVIDER = 'https://eth.bd.evmos.org:8545';
+const RPC_EXPLORER = 'https://evm.evmos.org';
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const whtoken = process.env.DISCORD_WH_TOKEN;
@@ -111,6 +113,7 @@ async function postMessage (msg_discord, msg_twitter) {
 }
 
 async function closeGitHubIssue (issueData) {
+  console.log('---issueData', issueData);
   if (issueData.state === 'closed') return;
   const request = `PATCH /repos/${volunteerRepo}/issues/${issueData.number}`;
   const data = {state: 'closed'};
@@ -131,7 +134,8 @@ async function assignGitHubIssue (issueData) {
 
 async function init () {
   // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  const provider = new ethers.providers.AlchemyProvider('rinkeby', alchemytoken);
+  // const provider = new ethers.providers.AlchemyProvider('rinkeby', alchemytoken);
+  const provider = new ethers.providers.JsonRpcProvider(RPC_PROVIDER);
 
   web3 = {provider};
   thelaurel = await getTheLaurel(web3, address);
@@ -148,7 +152,7 @@ function displayIssueTwitter (issue) {
 }
 
 function onTaskEvent (task) {
-  const etherscanlink = `https://rinkeby.etherscan.io/tx/` + task.transactionHash;
+  const etherscanlink = `${RPC_EXPLORER}/tx/` + task.transactionHash;
 
   let  msg_discord = `**Task registered by ${task.organizerData} - ${displayLaurelAmount(task.task.amount)} ${task.laurel}**
 ${task.gitHubIssue ? 'Url: ' + displayIssue(task.gitHubIssue) : 'ID: ' + task.taskid}
@@ -164,7 +168,7 @@ ${task.gitHubIssue ? 'Url: ' + displayIssueTwitter(task.gitHubIssue) : task.task
 }
 
 function onVoteEvent (data) {
-  const etherscanlink = `https://rinkeby.etherscan.io/tx/` + data.transactionHash;
+  const etherscanlink = `${RPC_EXPLORER}/tx/` + data.transactionHash;
   let amount, description;
   if (data.WL.toNumber() == 0) {
     amount = data.AL;
@@ -175,7 +179,7 @@ function onVoteEvent (data) {
   }
   amount = displayLaurelAmount(amount);
 
-  console.log('winnerIndex', data.winnerIndex, data.revertedIndex);
+  console.log('winnerIndex: ', data.winnerIndex, ' ; revertedIndex: ', data.revertedIndex);
   const {winnerIndex, revertedIndex} = data;
   const winnerText = `${(revertedIndex || revertedIndex === 0)  ? ('Reverted: option ' + revertedIndex + '\n') : ''}${(winnerIndex || winnerIndex === 0) ? ('WINNER: option ' + winnerIndex + '\n') : ''}`;
 
@@ -205,7 +209,7 @@ function onVoteEvent (data) {
 }
 
 function onClaimEvent (data) {
-  const etherscanlink = `https://rinkeby.etherscan.io/tx/` + data.transactionHash;
+  const etherscanlink = `${RPC_EXPLORER}/tx/` + data.transactionHash;
 
   const msg_discord = `**Claim ${data.optionIndex} registered by ${data.beneficiaryData}**
 Proof Url: ${data.optionUrl ? ('<' + data.optionUrl + '>') : 'not found'}

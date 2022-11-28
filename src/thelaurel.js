@@ -5,16 +5,16 @@ const compiled = require("./compiled");
 const laurelsRepo = 'the-laurel/laurels';
 const _volunteersMap = "https://raw.githubusercontent.com/the-laurel/laurels/main/data/volunteersMap.json";
 const _laurelsMap = "https://raw.githubusercontent.com/the-laurel/laurels/main/data/laurelsMap.json";
-const contractData = 'https://ipfs.io/ipfs/QmSNjQqnzTe7ra1DmgmVsQcEHTqRJXMZwW1cH9zcVfpte5';
+const contractData = 'https://gateway.pinata.cloud/ipfs/QmbQHi6GoPtapXGTDhftwDDgFmUw28CRkHbbArPpBYPYfM';
 const addresses = {
-  4: '0xD6866368Fcbe89bF10aCF948bc5Eb19b01e4dF82',
+  9001: '0xf4986e1b3FBBc1A823878123adA9E2d359c0a596',
 }
 const issueTitleRegex = /^(\[.*\])/;
 const unit = 1000;
 const cacheGitHubIssues = {};
 let lastGitHubIssueCreatedAt = null;
 
-const abi = compiled.output.abi;
+const abi = compiled.abi;
 
 let thelaurel, laurelsMap;
 const abbrev = {
@@ -28,7 +28,7 @@ const abbrev = {
 const getVolunteersMap = () => fetch(_volunteersMap).then(r => r.json());
 const getLaurelsMap = async (update = false) => {
   if (!update && laurelsMap) return laurelsMap;
-  
+
   laurelsMap = await fetch(_laurelsMap).then(r => r.json());
   for (let addr in laurelsMap) {
     laurelsMap[laurelsMap[addr]] = addr;
@@ -119,6 +119,7 @@ async function findGitHubIssue (taskid) {
 }
 
 async function findClaimUrl (issue, optionid) {
+  if (!issue.comments_url) return "";
   const comms = await fetch(issue.comments_url).then(r => r.json()).catch(e => []);
   if (!comms || !(comms instanceof Array) || comms.length == 0) return;
   const claimProofComment = comms.find(v => v.body.includes('[CLAIM PROOF]'));
